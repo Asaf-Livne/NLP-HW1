@@ -43,11 +43,12 @@ def naive_softmax_loss_and_gradient(
     softmax_probs = softmax(logits)
 
     # Compute the loss
-    u_o = outside_vectors[outside_word_idx]
-    loss = -np.log(softmax_probs[outside_word_idx])
-    grad_center_vec = -u_o + np.sum(np.expand_dims(softmax_probs, axis=1) * outside_vectors,axis=0)
-    grad_outside_vecs = np.outer(softmax_probs,center_word_vec)
-    grad_outside_vecs[outside_word_idx] = center_word_vec * (softmax_probs[outside_word_idx]-1)
+    u_o = outside_vectors[outside_word_idx] 
+    loss = -np.log(softmax_probs[outside_word_idx]) # Loss is -log(y_hat_outside)
+    # Calculating naive gradients
+    grad_center_vec = -u_o + np.sum(np.expand_dims(softmax_probs, axis=1) * outside_vectors,axis=0) 
+    grad_outside_vecs = np.outer(softmax_probs,center_word_vec) # Calculating for u_w /= u_o
+    grad_outside_vecs[outside_word_idx] = center_word_vec * (softmax_probs[outside_word_idx]-1) # Calculating for u_o
     ### END YOUR CODE
 
     return loss, grad_center_vec, grad_outside_vecs
@@ -81,27 +82,26 @@ def neg_sampling_loss_and_gradient(
 
     ### YOUR CODE HERE
     u_o = outside_vectors[outside_word_idx]
-    pos_inp = np.dot(u_o, center_word_vec)
-    loss = -np.log(sigmoid(pos_inp)) 
+    pos_inp = np.dot(u_o, center_word_vec) # Calculating the dot product for the positive sample
+    loss = -np.log(sigmoid(pos_inp))  # Loss contribution of positive sample
 
     negs = outside_vectors[neg_sample_word_indices]
-    negs_inp = np.dot(negs, center_word_vec)
-    loss -= np.sum(np.log(sigmoid(-negs_inp)))
+    negs_inp = np.dot(negs, center_word_vec) # Calculating the dot product for the negative samples
+    loss -= np.sum(np.log(sigmoid(-negs_inp))) # Loss contribution of negative samples
 
-    grad_center_vec = -(1-sigmoid(pos_inp)) * u_o 
-
-    
+    # Gradient calculation- v_c
+    grad_center_vec = -(1-sigmoid(pos_inp)) * u_o # Calculation for positive sample
     for indice in neg_sample_word_indices:
         u_k = outside_vectors[indice]
-        grad_center_vec += (1 - sigmoid(-np.dot(u_k, center_word_vec))) * u_k
+        grad_center_vec += (1 - sigmoid(-np.dot(u_k, center_word_vec))) * u_k # Calculation for negative samples
     
-    
-    grad_outside_vecs = np.zeros_like(outside_vectors)
+    # Gradient calculation- U
+    grad_outside_vecs = np.zeros_like(outside_vectors) # Shape is same as U
     for indice in neg_sample_word_indices:
         u_k = outside_vectors[indice]
-        grad_outside_vecs[indice] += (1 - sigmoid(-np.dot(u_k, center_word_vec))) * center_word_vec
+        grad_outside_vecs[indice] += (1 - sigmoid(-np.dot(u_k, center_word_vec))) * center_word_vec # Assigning the negative samples
 
-    grad_outside_vecs[outside_word_idx] = - (1 - sigmoid(pos_inp)) * center_word_vec
+    grad_outside_vecs[outside_word_idx] = - (1 - sigmoid(pos_inp)) * center_word_vec # Assigning the positive sample. The rest of the matrix is zeros.
     ### END YOUR CODE
 
     return loss, grad_center_vec, grad_outside_vecs
@@ -138,12 +138,14 @@ def skipgram(current_center_word, outside_words, word2ind,
                         (dJ / dU in the pdf handout)
     """
     loss = 0.0
-    grad_center_vecs = np.zeros(outside_vectors.shape)
-    grad_outside_vectors = np.zeros(outside_vectors.shape)
+    grad_center_vecs = np.zeros(outside_vectors.shape) 
+    grad_outside_vectors = np.zeros(outside_vectors.shape) 
 
     ### YOUR CODE HERE
     central_word_ind = word2ind[current_center_word]
     central_word_vec = center_word_vectors[central_word_ind]
+    
+    # Iterating over the window
     for outside_word in outside_words:
         outside_word_ind = word2ind[outside_word]
         loss_temp,grad_center_vecs_temp,grad_outside_vectors_temp = word2vec_loss_and_gradient(central_word_vec,outside_word_ind,outside_vectors,dataset)

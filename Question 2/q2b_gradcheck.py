@@ -17,13 +17,11 @@ def gradcheck_naive(f, x, gradient_text=""):
     fx, grad = f(x)  # Evaluate function value and gradients at original point
     h = 1e-4         # Step size for numerical gradient approximation
 
-    # Iterate over all indexes in x to check the gradient.
     it = np.nditer(x, flags=['multi_index'], op_flags=['readwrite'])
     while not it.finished:
         ix = it.multi_index  # Current index
         
-        # Store the original value of x[ix]
-        old_value = x[ix]
+        old_value = x[ix]   # Store the original value of x[ix]
 
         # Compute f(x + h)
         x[ix] = old_value + h
@@ -35,11 +33,9 @@ def gradcheck_naive(f, x, gradient_text=""):
         random.setstate(rndstate)  # Reset random state
         fxmh, _ = f(x)
 
-        # Restore x[ix] to its original value
-        x[ix] = old_value
+        x[ix] = old_value # Restore x[ix] to original value
 
-        # Compute numerical gradient using central difference
-        numgrad = (fxph - fxmh) / (2 * h)
+        numgrad = (fxph - fxmh) / (2 * h) # Compute the gradient using forward and backward values
 
         # Compare analytical and numerical gradients
         assert_allclose(numgrad, grad[ix], rtol=1e-5,

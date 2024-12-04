@@ -13,7 +13,7 @@ def softmax(x):
     """
     orig_shape = x.shape
 
-    x_max = np.max(x, axis=-1, keepdims=True)  # Keep dimensions for broadcasting
+    x_max = np.max(x, axis=-1, keepdims=True)  # Find the max value
     x_stable = x - x_max  # Subtract the max for numerical stability
     exp_x = np.exp(x_stable)  # Compute the exponentials
     softmax_x = exp_x / np.sum(exp_x, axis=-1, keepdims=True)  # Normalize to get softmax

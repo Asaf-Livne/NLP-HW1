@@ -88,9 +88,7 @@ def sgd(f, x0, step, iterations, postprocessing=None, use_saved=False,
         loss = None
         ### YOUR CODE HERE
         loss, grad = f(x)
-        x = x-step*grad
-        if(iter_ % 1000 == 0):
-            print(f"Iteration:{iter_}, The loss is: {loss}")
+        x = x-step*grad  # Step if x_n = x_n-1 - step * f'(x)
         ### END YOUR CODE
 
         x = postprocessing(x)
